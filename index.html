@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Home - {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="hero">
+    <!-- Left -->
+    <div class="hero-left">
+        <div class="hero-kicker">{{ t('hero_kicker') }}</div>
+        <h1 class="hero-title">{{ t('hero_title') }}</h1>
+        <p class="hero-subtitle">
+            {{ t('hero_subtitle') }}
+        </p>
+        <div class="hero-cta">
+            {% if current_user %}
+                <a href="{{ url_for('create_portfolio') }}" class="btn btn-primary btn-primary-hero">
+                    {{ t('hero_cta_main_logged_in') }}
+                </a>
+                <a href="{{ url_for('profile') }}" class="btn btn-outline-light btn-outline-hero">
+                    {{ t('hero_cta_secondary_logged_in') }}
+                </a>
+            {% else %}
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-primary-hero">
+                    {{ t('hero_cta_main_logged_out') }}
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-outline-hero">
+                    {{ t('hero_cta_secondary_logged_out') }}
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="hero-facts">
+            <div class="hero-fact">
+                <strong>{{ portfolios|length }}</strong>
+                <span>Public portfolio items in feed</span>
+            </div>
+            <div class="hero-fact">
+                <strong>Responsive</strong>
+                <span>Works on phone, tablet, desktop</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right -->
+    <div class="hero-right">
+        <div class="hero-right-header">
+            <div>
+                <div class="hero-right-title">Latest work preview</div>
+                <div class="hero-right-caption">Recent public items from the community</div>
+            </div>
+        </div>
+        <div class="hero-preview-grid">
+            {% for p in portfolios[:6] %}
+                <div class="hero-preview-card">
+                    {% if p['image_filename'] %}
+                        <img src="{{ url_for('uploaded_file', filename=p['image_filename']) }}"
+                             alt="{{ p['title'] }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/400x300.png?text=Portfolio"
+                             alt="Placeholder">
+                    {% endif %}
+                    <div class="hero-preview-meta">
+                        {{ p['title'][:18] }}{% if p['title']|length > 18 %}…{% endif %}
+                    </div>
+                </div>
+            {% else %}
+                {% for i in range(6) %}
+                    <div class="hero-preview-card">
+                        <img src="https://via.placeholder.com/400x300.png?text=Portfolio"
+                             alt="Sample">
+                        <div class="hero-preview-meta">Sample project</div>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- FILTER / SEARCH PANEL -->
+<section class="mb-3">
+    <div class="section-heading">
+        <h2>{{ t('section_public_feed_title') }}</h2>
+        <span>{{ t('section_public_feed_subtitle') }}</span>
+    </div>
+
+    <form class="filter-panel" method="get" action="{{ url_for('index') }}">
+        <div class="row gy-2 gx-2">
+            <div class="col-md-6">
+                <input type="text" name="q" class="form-control"
+                       placeholder="{{ t('search_placeholder') }}"
+                       value="{{ q }}">
+            </div>
+            <div class="col-md-3">
+                <select name="category" class="form-select">
+                    <option value="">{{ t('filter_all_categories') }}</option>
+                    {% for c in categories %}
+                        <option value="{{ c['category'] }}"
+                                {% if category == c['category'] %}selected{% endif %}>
+                            {{ c['category'] }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-grid">
+                <button type="submit" class="btn btn-outline-light">{{ t('btn_filter') }}</button>
+            </div>
+        </div>
+    </form>
+</section>
+
+<!-- FEED GRID -->
+{% if portfolios %}
+    <div class="row g-4">
+        {% for p in portfolios %}
+            <div class="col-md-4">
+                <article class="card portfolio-card h-100">
+                    {% if p['image_filename'] %}
+                        <img src="{{ url_for('uploaded_file', filename=p['image_filename']) }}"
+                             class="portfolio-image" alt="{{ p['title'] }}">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-2">
+                            {% if p['avatar_filename'] %}
+                                <img src="{{ url_for('uploaded_file', filename=p['avatar_filename']) }}"
+                                     class="avatar avatar-sm me-2" alt="{{ p['full_name'] }}">
+                            {% else %}
+                                <div class="avatar avatar-sm avatar-placeholder me-2">
+                                    {{ p['full_name'][0]|upper }}
+                                </div>
+                            {% endif %}
+                            <div>
+                                <div class="small fw-semibold">{{ p['full_name'] }}</div>
+                                <div class="small text-muted">@{{ p['username'] }}</div>
+                            </div>
+                        </div>
+                        <h5 class="card-title mb-1">{{ p['title'] }}</h5>
+                        {% if p['category'] %}
+                            <span class="badge bg-secondary mb-2">{{ p['category'] }}</span>
+                        {% endif %}
+                        <p class="card-text text-muted small flex-grow-1">
+                            {{ p['description'][:160] }}{% if p['description'] and p['description']|length > 160 %}...{% endif %}
+                        </p>
+                        <div class="mt-2 d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('public_profile', username=p['username']) }}"
+                               class="btn btn-sm btn-outline-light">{{ t('btn_view_profile') }}</a>
+                            {% if p['tags'] %}
+                                <span class="tags-text">
+                                    #{{ p['tags']|replace(',', ' #') }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('index', page=page-1, q=q, category=category) }}">Previous</a>
+                </li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">{{ page }}</span></li>
+            {% if has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('index', page=page+1, q=q, category=category) }}">Next</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% else %}
+    <div class="text-center text-muted mt-5">
+        <p>{{ t('text_no_portfolios') }}</p>
+        {% if not current_user %}
+            <p>
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-primary-hero">
+                    {{ t('text_create_account_cta') }}
+                </a>
+            </p>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}My Profile - PortfoHub{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper">
+    <!-- Sariq yon panel -->
+    <aside class="profile-sidebar">
+        <div class="text-center">
+            {% if user['avatar_filename'] %}
+                <img src="{{ url_for('uploaded_file', filename=user['avatar_filename']) }}"
+                     class="avatar avatar-lg mb-3" alt="{{ user['full_name'] }}">
+            {% else %}
+                <div class="avatar avatar-lg avatar-placeholder mb-3">
+                    {{ user['full_name'][0]|upper }}
+                </div>
+            {% endif %}
+
+            <div class="profile-name">{{ user['full_name'] }}</div>
+            <div class="profile-username">@{{ user['username'] }}</div>
+            {% if user['profession'] %}
+                <div class="profile-profession">{{ user['profession'] }}</div>
+            {% endif %}
+            {% if user['location'] %}
+                <div class="profile-location mt-1">{{ user['location'] }}</div>
+            {% endif %}
+        </div>
+
+        <ul class="profile-menu">
+            <li><a href="#about" class="active"><span class="bullet"></span>About me</a></li>
+            <li><a href="#portfolio"><span class="bullet"></span>Portfolio</a></li>
+            <li><a href="{{ url_for('settings') }}"><span class="bullet"></span>Settings</a></li>
+            <li><a href="{{ url_for('public_profile', username=user['username']) }}"><span class="bullet"></span>Public view</a></li>
+        </ul>
+
+        <div class="profile-sidebar-links">
+            {% if user['website'] %}
+                <a href="{{ user['website'] }}" target="_blank">Website</a>
+            {% endif %}
+            {% if user['linkedin'] %}
+                <a href="{{ user['linkedin'] }}" target="_blank">LinkedIn</a>
+            {% endif %}
+            {% if user['github'] %}
+                <a href="{{ user['github'] }}" target="_blank">GitHub</a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <!-- Asosiy kontent -->
+    <section class="profile-main">
+        <!-- ABOUT -->
+        <section id="about" class="mb-4">
+            <div class="section-label">About me</div>
+            <div class="section-title">Personal profile</div>
+
+            <div class="row">
+                <div class="col-lg-7">
+                    <p class="about-text">
+                        {% if user['bio'] %}
+                            {{ user['bio'] }}
+                        {% else %}
+                            This is your personal portfolio space. Use the settings page to add a short bio,
+                            links, and more details about your professional background.
+                        {% endif %}
+                    </p>
+                    <p class="about-text mb-1">
+                        <strong>Full name:</strong> {{ user['full_name'] }}
+                    </p>
+                    <p class="about-text mb-1">
+                        <strong>Profession:</strong> {{ user['profession'] or 'Not specified' }}
+                    </p>
+                    <p class="about-text mb-1">
+                        <strong>Location:</strong> {{ user['location'] or 'Not specified' }}
+                    </p>
+                </div>
+                <div class="col-lg-5">
+                    <div class="fact-grid">
+                        <div class="fact-pill">
+                            <strong>{{ portfolios|length }}</strong>
+                            <span>Portfolio items</span>
+                        </div>
+                        <div class="fact-pill">
+                            <strong>100%</strong>
+                            <span>Professional focus</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-4">
+
+        <!-- PORTFOLIO -->
+        <section id="portfolio">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <div class="section-label">Portfolio</div>
+                    <div class="section-title mb-0">My work</div>
+                </div>
+                <a href="{{ url_for('create_portfolio') }}" class="btn btn-success">
+                    + New portfolio
+                </a>
+            </div>
+
+            {% if portfolios %}
+                <div class="profile-portfolio-list">
+                    <div class="row g-4">
+                        {% for p in portfolios %}
+                            <div class="col-12">
+                                <div class="card profile-portfolio-card">
+                                    <div class="row g-0">
+                                        {% if p['image_filename'] %}
+                                            <div class="col-md-4">
+                                                <img src="{{ url_for('uploaded_file', filename=p['image_filename']) }}"
+                                                     class="img-fluid h-100 object-fit-cover" alt="{{ p['title'] }}">
+                                            </div>
+                                            <div class="col-md-8">
+                                        {% else %}
+                                            <div class="col-12">
+                                        {% endif %}
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <h5 class="card-title mb-0">{{ p['title'] }}</h5>
+                                                    <span class="badge badge-visibility
+                                                        {% if p['visibility'] == 'public' %}bg-success{% else %}bg-secondary{% endif %}">
+                                                        {{ p['visibility']|capitalize }}
+                                                    </span>
+                                                </div>
+                                                {% if p['category'] %}
+                                                    <span class="badge bg-secondary mt-1">{{ p['category'] }}</span>
+                                                {% endif %}
+                                                <p class="card-text mt-2">
+                                                    {{ p['description'][:220] }}{% if p['description'] and p['description']|length > 220 %}...{% endif %}
+                                                </p>
+                                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                                    <div class="tags-text">
+                                                        {% if p['tags'] %}
+                                                            #{{ p['tags']|replace(',', ' #') }}
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="d-flex gap-2">
+                                                        {% if p['external_link'] %}
+                                                            <a href="{{ p['external_link'] }}" target="_blank"
+                                                               class="btn btn-sm btn-outline-secondary">View link</a>
+                                                        {% endif %}
+                                                        <a href="{{ url_for('edit_portfolio', item_id=p['id']) }}"
+                                                           class="btn btn-sm btn-outline-primary">Edit</a>
+                                                        <form method="post"
+                                                              action="{{ url_for('delete_portfolio', item_id=p['id']) }}"
+                                                              class="d-inline"
+                                                              onsubmit="return confirm('Delete this portfolio item?');">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                                Delete
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-light border text-muted mt-3">
+                    You have no portfolio items yet.
+                    <a href="{{ url_for('create_portfolio') }}">Create your first one.</a>
+                </div>
+            {% endif %}
+
+        </section>
+    </section>
+</div>
+{% endblock %}

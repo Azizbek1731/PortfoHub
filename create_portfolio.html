@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% if portfolio %}
+    {% set page_title = "Edit portfolio item" %}
+{% else %}
+    {% set page_title = "Create portfolio item" %}
+{% endif %}
+{% block title %}{{ page_title }} - PortfoHub{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h1 class="h4 mb-3">{{ page_title }}</h1>
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">Title *</label>
+                        <input type="text" name="title" class="form-control"
+                               value="{{ portfolio['title'] if portfolio else '' }}"
+                               placeholder="Project or work title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="5"
+                                  placeholder="Describe your project, work, or achievement...">{{ portfolio['description'] if portfolio else '' }}</textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Category</label>
+                            <input type="text" name="category" class="form-control"
+                                   value="{{ portfolio['category'] if portfolio else '' }}"
+                                   placeholder="e.g. Article, Design, Research">
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label">Tags</label>
+                            <input type="text" name="tags" class="form-control"
+                                   value="{{ portfolio['tags'] if portfolio else '' }}"
+                                   placeholder="e.g. cardiology, frontend, AI">
+                            <div class="form-text">Separate tags with commas.</div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">External link</label>
+                        <input type="url" name="external_link" class="form-control"
+                               value="{{ portfolio['external_link'] if portfolio else '' }}"
+                               placeholder="Link to article, repository, or document">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Image</label>
+                        <input type="file" name="image" class="form-control">
+                        <div class="form-text">Optional. Only jpg, jpeg, png, gif. Max size: 100 MB.</div>
+                        {% if portfolio and portfolio['image_filename'] %}
+                            <div class="mt-2">
+                                <span class="small text-muted">Current image:</span><br>
+                                <img src="{{ url_for('uploaded_file', filename=portfolio['image_filename']) }}"
+                                     class="img-thumbnail mt-1" style="max-height: 150px;" alt="Current image">
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label d-block">Visibility</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="visibility" id="visPublic"
+                                   value="public"
+                                   {% if not portfolio or portfolio['visibility'] == 'public' %}checked{% endif %}>
+                            <label class="form-check-label" for="visPublic">Public</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="visibility" id="visPrivate"
+                                   value="private"
+                                   {% if portfolio and portfolio['visibility'] == 'private' %}checked{% endif %}>
+                            <label class="form-check-label" for="visPrivate">Private</label>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if portfolio %}Save changes{% else %}Create{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

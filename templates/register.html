@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ t('auth_register_title') }} - {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm portfolio-card auth-card">
+            <div class="card-body">
+                <h1 class="h4 mb-3 text-center">{{ t('auth_register_title') }}</h1>
+                <form method="post" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('label_full_name') }}</label>
+                        <input type="text" name="full_name" class="form-control"
+                               placeholder="{{ t('label_full_name') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('label_username') }}</label>
+                        <input type="text" name="username" class="form-control"
+                               placeholder="{{ t('label_username') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('label_email') }}</label>
+                        <input type="email" name="email" class="form-control"
+                               placeholder="you@example.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('label_password') }}</label>
+                        <input type="password" name="password" class="form-control"
+                               required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('label_confirm_password') }}</label>
+                        <input type="password" name="confirm_password" class="form-control"
+                               required>
+                    </div>
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-primary-hero">
+                            {{ t('auth_register_button') }}
+                        </button>
+                    </div>
+                    <div class="text-center small">
+                        {{ t('auth_already_account') }}
+                        <a href="{{ url_for('login') }}">{{ t('auth_login_here') }}</a>.
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

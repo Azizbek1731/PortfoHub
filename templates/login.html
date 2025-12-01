@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ t('auth_login_title') }} - {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm portfolio-card auth-card">
+            <div class="card-body">
+                <h1 class="h4 mb-3 text-center">{{ t('auth_login_title') }}</h1>
+                <form method="post" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('label_username_or_email') }}</label>
+                        <input type="text" name="username" class="form-control"
+                               placeholder="{{ t('label_username_or_email') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ t('label_password') }}</label>
+                        <input type="password" name="password" class="form-control"
+                               required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe" name="remember">
+                        <label class="form-check-label" for="rememberMe">{{ t('label_remember_me') }}</label>
+                    </div>
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-primary-hero">
+                            {{ t('auth_login_button') }}
+                        </button>
+                    </div>
+                    <div class="text-center small">
+                        {{ t('auth_new_here') }}
+                        <a href="{{ url_for('register') }}">{{ t('auth_create_here') }}</a>.
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
